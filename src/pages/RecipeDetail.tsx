@@ -8,6 +8,7 @@ import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type Recipe = Tables<"recipes">;
 
@@ -15,6 +16,7 @@ const RecipeDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+  const isMobile = useIsMobile();
 
   const { data: recipe, isLoading, error } = useQuery({
     queryKey: ["recipe", id],
@@ -103,7 +105,7 @@ const RecipeDetail = () => {
 
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-4xl mx-auto px-4">
         <div className="mb-6">
           <Button variant="ghost" asChild className="pl-0 mb-4">
             <Link to="/">
@@ -111,14 +113,15 @@ const RecipeDetail = () => {
             </Link>
           </Button>
           
-          <div className="flex justify-between items-start">
+          {/* Mobile-friendly header with title and action buttons */}
+          <div className="flex flex-col gap-4 md:flex-row md:justify-between md:items-start">
             <div>
-              <h1 className="text-3xl font-bold">{recipe.title}</h1>
+              <h1 className="text-2xl md:text-3xl font-bold">{recipe.title}</h1>
               {recipe.description && (
                 <p className="text-gray-600 mt-2">{recipe.description}</p>
               )}
               
-              <div className="flex items-center gap-4 mt-4 text-sm text-gray-600">
+              <div className="flex flex-wrap items-center gap-3 md:gap-4 mt-4 text-sm text-gray-600">
                 <div className="flex items-center">
                   <Clock className="h-4 w-4 mr-1" />
                   <span>Prep: {recipe.prep_time} min</span>
@@ -138,16 +141,35 @@ const RecipeDetail = () => {
               </div>
             </div>
             
-            <div className="flex gap-2">
-              <Button variant="outline" asChild>
-                <Link to={`/recipes/edit/${recipe.id}`}>
-                  <Edit className="h-4 w-4 mr-1" /> Edit
-                </Link>
-              </Button>
-              <Button variant="destructive" onClick={handleDelete} disabled={deleteRecipe.isPending}>
-                <Trash className="h-4 w-4 mr-1" /> Delete
-              </Button>
-            </div>
+            {/* Fixed position buttons on mobile, regular position on desktop */}
+            {isMobile ? (
+              <div className="fixed bottom-4 right-4 z-10 flex gap-2">
+                <Button variant="outline" asChild className="bg-white shadow-md">
+                  <Link to={`/recipes/edit/${recipe.id}`}>
+                    <Edit className="h-4 w-4 mr-1" /> Edit
+                  </Link>
+                </Button>
+                <Button 
+                  variant="destructive" 
+                  onClick={handleDelete} 
+                  disabled={deleteRecipe.isPending}
+                  className="shadow-md"
+                >
+                  <Trash className="h-4 w-4 mr-1" /> Delete
+                </Button>
+              </div>
+            ) : (
+              <div className="flex gap-2">
+                <Button variant="outline" asChild>
+                  <Link to={`/recipes/edit/${recipe.id}`}>
+                    <Edit className="h-4 w-4 mr-1" /> Edit
+                  </Link>
+                </Button>
+                <Button variant="destructive" onClick={handleDelete} disabled={deleteRecipe.isPending}>
+                  <Trash className="h-4 w-4 mr-1" /> Delete
+                </Button>
+              </div>
+            )}
           </div>
         </div>
         
@@ -188,6 +210,9 @@ const RecipeDetail = () => {
             </ol>
           </div>
         </div>
+        
+        {/* Add spacing at the bottom for mobile to prevent content being hidden behind fixed buttons */}
+        {isMobile && <div className="h-16"></div>}
       </div>
     </Layout>
   );
