@@ -8,7 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 
-type RecipeInsert = Tables<"recipes">["Insert"];
+// Define Recipe and RecipeInsert types directly based on Tables
+type Recipe = Tables<"recipes">;
+type RecipeInsert = Omit<Recipe, "id" | "created_at" | "updated_at">;
 
 const NewRecipe = () => {
   const navigate = useNavigate();

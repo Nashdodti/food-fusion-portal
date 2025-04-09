@@ -8,8 +8,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 
+// Define Recipe and RecipeUpdate types directly based on Tables
 type Recipe = Tables<"recipes">;
-type RecipeUpdate = Tables<"recipes">["Update"];
+type RecipeUpdate = Partial<Omit<Recipe, "id" | "created_at" | "updated_at">>;
 
 const EditRecipe = () => {
   const { id } = useParams<{ id: string }>();
