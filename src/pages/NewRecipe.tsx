@@ -2,11 +2,13 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { RecipeForm } from "@/components/RecipeForm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
 
 // Define Recipe and RecipeInsert types directly based on Tables
 type Recipe = Tables<"recipes">;
@@ -51,10 +53,19 @@ const NewRecipe = () => {
     await createRecipe.mutateAsync(data);
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Create New Recipe</h1>
+        <div className="flex items-center mb-8">
+          <Button variant="ghost" onClick={handleGoBack} className="mr-4">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          </Button>
+          <h1 className="text-3xl font-bold">Create New Recipe</h1>
+        </div>
         <RecipeForm 
           onSubmit={handleSubmit}
           isSubmitting={createRecipe.isPending}

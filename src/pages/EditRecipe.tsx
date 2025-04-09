@@ -1,12 +1,13 @@
-
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { ArrowLeft } from "lucide-react";
 import { Layout } from "@/components/Layout";
 import { RecipeForm } from "@/components/RecipeForm";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
+import { Button } from "@/components/ui/button";
 
 // Define Recipe and RecipeUpdate types directly based on Tables
 type Recipe = Tables<"recipes">;
@@ -76,11 +77,20 @@ const EditRecipe = () => {
     await updateRecipe.mutateAsync(data);
   };
 
+  const handleGoBack = () => {
+    navigate(-1);
+  };
+
   if (isLoading) {
     return (
       <Layout>
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-3xl font-bold mb-8">Edit Recipe</h1>
+          <div className="flex items-center mb-8">
+            <Button variant="ghost" onClick={handleGoBack} className="mr-4">
+              <ArrowLeft className="mr-2 h-4 w-4" /> Back
+            </Button>
+            <h1 className="text-3xl font-bold mb-8">Edit Recipe</h1>
+          </div>
           <div className="animate-pulse space-y-6">
             <div className="h-10 bg-gray-200 rounded w-1/2" />
             <div className="h-10 bg-gray-200 rounded" />
@@ -95,6 +105,9 @@ const EditRecipe = () => {
     return (
       <Layout>
         <div className="max-w-4xl mx-auto text-center py-12">
+          <Button variant="ghost" onClick={handleGoBack} className="mb-4">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          </Button>
           <p className="text-red-500">Failed to load recipe</p>
           <p className="text-gray-500 text-sm mt-2">{String(error)}</p>
         </div>
@@ -105,7 +118,12 @@ const EditRecipe = () => {
   return (
     <Layout>
       <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold mb-8">Edit Recipe</h1>
+        <div className="flex items-center mb-8">
+          <Button variant="ghost" onClick={handleGoBack} className="mr-4">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back
+          </Button>
+          <h1 className="text-3xl font-bold">Edit Recipe</h1>
+        </div>
         <RecipeForm 
           initialData={recipe}
           onSubmit={handleSubmit}
