@@ -1,14 +1,25 @@
 
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { Clock, Edit, Trash, ArrowLeft } from "lucide-react";
+import { Clock, Edit, Trash, ArrowLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Layout } from "@/components/Layout";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "@/hooks/use-toast";
 import { Tables } from "@/integrations/supabase/types";
 import { useIsMobile } from "@/hooks/use-mobile";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Input } from "@/components/ui/input";
 
 type Recipe = Tables<"recipes">;
 
@@ -17,6 +28,10 @@ const RecipeDetail = () => {
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const isMobile = useIsMobile();
+  
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [password, setPassword] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const { data: recipe, isLoading, error } = useQuery({
     queryKey: ["recipe", id],
@@ -68,9 +83,20 @@ const RecipeDetail = () => {
     },
   });
 
-  const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this recipe?")) {
+  const handleDeleteClick = () => {
+    setIsDeleteDialogOpen(true);
+    setPassword("");
+    setPasswordError("");
+  };
+
+  const handleConfirmDelete = () => {
+    const correctPassword = "9090";
+    
+    if (password === correctPassword) {
       deleteRecipe.mutate();
+      setIsDeleteDialogOpen(false);
+    } else {
+      setPasswordError("Incorrect password. Please try again.");
     }
   };
 
@@ -151,7 +177,7 @@ const RecipeDetail = () => {
                 </Button>
                 <Button 
                   variant="destructive" 
-                  onClick={handleDelete} 
+                  onClick={handleDeleteClick} 
                   disabled={deleteRecipe.isPending}
                   className="shadow-md"
                 >
@@ -165,13 +191,53 @@ const RecipeDetail = () => {
                     <Edit className="h-4 w-4 mr-1" /> Edit
                   </Link>
                 </Button>
-                <Button variant="destructive" onClick={handleDelete} disabled={deleteRecipe.isPending}>
+                <Button variant="destructive" onClick={handleDeleteClick} disabled={deleteRecipe.isPending}>
                   <Trash className="h-4 w-4 mr-1" /> Delete
                 </Button>
               </div>
             )}
           </div>
         </div>
+        
+        {/* Delete Confirmation Dialog with Password */}
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Recipe</AlertDialogTitle>
+              <AlertDialogDescription>
+                <div className="space-y-4 py-2">
+                  <p>This action cannot be undone. Please enter the admin password to confirm deletion.</p>
+                  <div className="flex items-center">
+                    <Shield className="h-4 w-4 mr-2 text-amber-500" />
+                    <span className="text-amber-500 font-medium">Password protected</span>
+                  </div>
+                  <Input
+                    type="password"
+                    placeholder="Enter password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className={passwordError ? "border-red-500" : ""}
+                  />
+                  {passwordError && (
+                    <p className="text-red-500 text-sm">{passwordError}</p>
+                  )}
+                </div>
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleConfirmDelete();
+                }}
+                className="bg-red-600 hover:bg-red-700"
+              >
+                Delete Recipe
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         
         {recipe.image_url && (
           <div className="my-6 rounded-lg overflow-hidden">
